@@ -13,24 +13,24 @@ public class LRTable {
 	
 	public void log(Vector<String> symbols) {
 
-		System.out.print("State|");
+		System.out.print("State   |");
 		
 		for(int i=0;i<symbols.size();i++) {
 			String string = symbols.get(i);
-			System.out.print("   " + string + "   |");
+			System.out.printf("%-8s|", string);
 		}
 		System.out.println();
 		
 		for(int i=0;i<table.size();i++){
 			Hashtable<String, TableItem> row = table.get(i);
-			System.out.print(i + "    |");
+			System.out.printf("%-8s|", i);
 			
 			for (int j=0;j<symbols.size();j++) {
 				TableItem tableItem = (TableItem) row.get(symbols.get(j));
 				if (tableItem.getNextState()==-1) {
-					System.out.print(" ["+tableItem.type+",-] |");
+					System.out.printf("%-8s|","[" + tableItem.type + ",-]");
 				}else{
-					System.out.print(" " + tableItem+" |");
+					System.out.printf("%-8s|", tableItem);
 				}
 			}
 			System.out.println();

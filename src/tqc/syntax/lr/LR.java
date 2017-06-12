@@ -103,7 +103,6 @@ public class LR {
 
 		lrTable.log(mysymbols);
 		
-		Production p0 = new Production("S", "E");
 		Production p1 = new Production("E", "E+T");
 		Production p2 = new Production("E", "T");
 		Production p3 = new Production("T", "T*F");
@@ -112,7 +111,6 @@ public class LR {
 		Production p6 = new Production("F", "i");
 		Grammar grammar = new Grammar();
 
-		grammar.addProduction(p0);
 		grammar.addProduction(p1);
 		grammar.addProduction(p2);
 		grammar.addProduction(p3);
@@ -121,7 +119,7 @@ public class LR {
 		grammar.addProduction(p6);
 		
 		System.out.println(grammar);
-		analysis("i*i+i", lrTable, grammar);
+		analysis("1+3*(2+4)", lrTable, grammar);
 	}
 
 	public static Vector<String> mysymbols = new Vector<>();
@@ -137,7 +135,6 @@ public class LR {
 		mysymbols.add("E");
 		mysymbols.add("T");
 		mysymbols.add("F");
-		mysymbols.add("S");
 	}
 
 	public static void initOneRow(Hashtable<String, TableItem> hashtable) {
@@ -149,41 +146,90 @@ public class LR {
 	
 	public static void analysis(String inputStr, LRTable lrTable, Grammar grammar){
 		
-		System.out.println("StateStack | CharStack | Input");
+		System.out.println("stateStack                    | charStack                    | valueStack                   | Input");
 		
 		Stack<Integer> stateStack = new Stack<>();
 		Stack<Character> charStack = new Stack<>();
+		
+		Stack<Integer> valueStack = new Stack<>();	//To calculate the value.
+		
 		int c = 0;		//flag;
 		String str = inputStr + "#";
+		int value = 0;
 		
 		stateStack.push(0);
 		charStack.push('#');
+		valueStack.push(0);	//0 is placeholder
 		
-		System.out.println(stateStack.toString() + "      |" + charStack + "     |" + str.substring(c));
+		//Output first row
+		System.out.printf("%-30s|%-30s|%-30s|%-30s|\n",stateStack, charStack, valueStack, str.substring(c));
 		
 		while(c<str.length()){
 			
 			int s = stateStack.peek();
 			char ch = str.charAt(c);
 			
+			if (Character.isDigit(ch)) {
+				value = Integer.parseInt(String.valueOf(ch));
+				ch = 'i';
+			}else{
+				value = 0;	//placeholder
+			}
+			
 			Hashtable<String, TableItem> row = lrTable.table.get(s);
 			TableItem tableItem = row.get(String.valueOf(ch));
+			if (tableItem == null) {
+				System.out.println("Error: illegal input char: " + ch);
+				return;
+			}
 			
 			if (tableItem.getType() == 's') {
 				stateStack.push(tableItem.getNextState());
 				charStack.push(ch);
+
+				valueStack.push(value);
+				
 				c++;
 				
-				System.out.println(stateStack.toString() + "     |" + charStack + "     |" + str.substring(c));
+				System.out.printf("%-30s|%-30s|%-30s|%-30s|\n",stateStack, charStack, valueStack, str.substring(c));
 				
 			}else if (tableItem.getType() == 'r') {
 				
-				int rightlen = grammar.productions.get(tableItem.getNextState()-1).getRight().size();
-			    Vector<Symbol> left = grammar.productions.get(tableItem.getNextState()-1).getLeft();
+				int proIndex = tableItem.getNextState()-1;
 				
+				int rightlen = grammar.productions.get(proIndex).getRight().size();
+			    Vector<Symbol> left = grammar.productions.get(proIndex).getLeft();
+				
+			    //Here to calculate the value.
+			    if (proIndex == 0) {//+
+					Integer leftv = valueStack.pop();
+					valueStack.pop();
+					Integer rightv = valueStack.pop();
+					
+					valueStack.push((leftv+rightv));
+					
+				}else if (proIndex == 2) {//*
+					Integer leftv = valueStack.pop();
+					valueStack.pop();
+					Integer rightv = valueStack.pop();
+					
+					valueStack.push((leftv*rightv));
+					
+				}else if (proIndex == 4) {//()
+					
+					valueStack.pop();
+					Integer v = valueStack.pop();
+					valueStack.pop();
+					valueStack.push(v);
+				}
 			    
 			    
 				for(int i=0;i<rightlen;i++){
+					
+					if (stateStack.isEmpty() || charStack.isEmpty()) {
+						System.out.println("Error: Empty stack");
+						return;
+					}
 					stateStack.pop();
 					charStack.pop();
 				}
@@ -194,10 +240,11 @@ public class LR {
 				
 				stateStack.push(ns);
 				
-				System.out.println(stateStack.toString() + "    |" + charStack + "       |" + str.substring(c));
+				System.out.printf("%-30s|%-30s|%-30s|%-30s|\n",stateStack, charStack, valueStack, str.substring(c));
 				
 			}else if (tableItem.getType() == 'a') {
 				System.out.println("Success");
+				System.out.println("The value is "+ valueStack.peek());
 				break;
 			}else {	//Error
 				System.out.println("Error: " + tableItem);
@@ -205,7 +252,6 @@ public class LR {
 			}
 			
 		}
-		
-	}
+	}// End of function analysis
 
 }
