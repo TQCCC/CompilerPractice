@@ -1,8 +1,12 @@
 package tqc.syntax.lr;
 
 import java.util.Hashtable;
+import java.util.Stack;
 import java.util.Vector;
 
+import tqc.syntax.Grammar;
+import tqc.syntax.Production;
+import tqc.syntax.Symbol;
 import tqc.syntax.lr.LRTable.TableItem;
 
 public class LR {
@@ -98,6 +102,26 @@ public class LR {
 		r11.put("#", new TableItem('r', 5));	
 
 		lrTable.log(mysymbols);
+		
+		Production p0 = new Production("S", "E");
+		Production p1 = new Production("E", "E+T");
+		Production p2 = new Production("E", "T");
+		Production p3 = new Production("T", "T*F");
+		Production p4 = new Production("T", "F");
+		Production p5 = new Production("F", "(E)");
+		Production p6 = new Production("F", "i");
+		Grammar grammar = new Grammar();
+
+		grammar.addProduction(p0);
+		grammar.addProduction(p1);
+		grammar.addProduction(p2);
+		grammar.addProduction(p3);
+		grammar.addProduction(p4);
+		grammar.addProduction(p5);
+		grammar.addProduction(p6);
+		
+		System.out.println(grammar);
+		analysis("i*i+i", lrTable, grammar);
 	}
 
 	public static Vector<String> mysymbols = new Vector<>();
@@ -113,6 +137,7 @@ public class LR {
 		mysymbols.add("E");
 		mysymbols.add("T");
 		mysymbols.add("F");
+		mysymbols.add("S");
 	}
 
 	public static void initOneRow(Hashtable<String, TableItem> hashtable) {
@@ -120,6 +145,67 @@ public class LR {
 			hashtable.put(mysymbols.get(i), new TableItem('-', -1));
 		}
 		lrTable.addOneRow(hashtable);
+	}
+	
+	public static void analysis(String inputStr, LRTable lrTable, Grammar grammar){
+		
+		System.out.println("StateStack | CharStack | Input");
+		
+		Stack<Integer> stateStack = new Stack<>();
+		Stack<Character> charStack = new Stack<>();
+		int c = 0;		//flag;
+		String str = inputStr + "#";
+		
+		stateStack.push(0);
+		charStack.push('#');
+		
+		System.out.println(stateStack.toString() + "      |" + charStack + "     |" + str.substring(c));
+		
+		while(c<str.length()){
+			
+			int s = stateStack.peek();
+			char ch = str.charAt(c);
+			
+			Hashtable<String, TableItem> row = lrTable.table.get(s);
+			TableItem tableItem = row.get(String.valueOf(ch));
+			
+			if (tableItem.getType() == 's') {
+				stateStack.push(tableItem.getNextState());
+				charStack.push(ch);
+				c++;
+				
+				System.out.println(stateStack.toString() + "     |" + charStack + "     |" + str.substring(c));
+				
+			}else if (tableItem.getType() == 'r') {
+				
+				int rightlen = grammar.productions.get(tableItem.getNextState()-1).getRight().size();
+			    Vector<Symbol> left = grammar.productions.get(tableItem.getNextState()-1).getLeft();
+				
+			    
+			    
+				for(int i=0;i<rightlen;i++){
+					stateStack.pop();
+					charStack.pop();
+				}
+				charStack.push(left.get(0).toString().charAt(0));
+				
+				int s_ = stateStack.peek();
+				int ns = lrTable.table.get(s_).get(left.get(0).toString()).getNextState();
+				
+				stateStack.push(ns);
+				
+				System.out.println(stateStack.toString() + "    |" + charStack + "       |" + str.substring(c));
+				
+			}else if (tableItem.getType() == 'a') {
+				System.out.println("Success");
+				break;
+			}else {	//Error
+				System.out.println("Error: " + tableItem);
+				break;
+			}
+			
+		}
+		
 	}
 
 }

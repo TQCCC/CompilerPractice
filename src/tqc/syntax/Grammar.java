@@ -5,7 +5,7 @@ import java.util.Vector;
 
 public class Grammar {
 	
-	private Vector<Production> productions = new Vector<>();
+	public Vector<Production> productions = new Vector<>();
 
 	public Grammar(){
 		

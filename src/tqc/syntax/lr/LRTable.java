@@ -1,18 +1,11 @@
 package tqc.syntax.lr;
 
-import java.util.Collection;
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Set;
 import java.util.Vector;
 
 public class LRTable {
 	
-	public static void main(String[] args) {
-		
-	}
-	
-	private Vector<Hashtable<String, TableItem>> table = new Vector<>();
+	public Vector<Hashtable<String, TableItem>> table = new Vector<>();
 
 	public void addOneRow(Hashtable<String, TableItem> hashtable){
 		table.add(hashtable);
