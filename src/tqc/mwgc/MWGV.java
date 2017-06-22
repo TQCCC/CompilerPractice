@@ -61,7 +61,7 @@ public class MWGV {
 		int count = 0;
 		for(Object o : v){
 			count++;
-			System.out.println(count);
+			System.out.print(count);
 			((SituationNode)o).show();
 		}
 		

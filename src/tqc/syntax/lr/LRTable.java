@@ -3,6 +3,10 @@ package tqc.syntax.lr;
 import java.util.Hashtable;
 import java.util.Vector;
 
+/**
+ * @date 6-12-2017
+ * @author TQC
+ * */
 public class LRTable {
 	
 	public Vector<Hashtable<String, TableItem>> table = new Vector<>();

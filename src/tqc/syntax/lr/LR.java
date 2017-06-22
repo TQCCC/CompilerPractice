@@ -9,6 +9,11 @@ import tqc.syntax.Production;
 import tqc.syntax.Symbol;
 import tqc.syntax.lr.LRTable.TableItem;
 
+/**
+ * @date 6-12-2017
+ * @author TQC
+ * */
+
 public class LR {
 	
 	static LRTable lrTable = new LRTable();
@@ -119,7 +124,7 @@ public class LR {
 		grammar.addProduction(p6);
 		
 		System.out.println(grammar);
-		analysis("1+3*(2+4)", lrTable, grammar);
+		analysis("3*(2+4)", lrTable, grammar);
 	}
 
 	public static Vector<String> mysymbols = new Vector<>();
